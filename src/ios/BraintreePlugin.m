@@ -106,20 +106,12 @@ NSString *countryCode;
         [self.commandDelegate sendPluginResult:res callbackId:command.callbackId];
         return;
     }
-
-	if ((PKPaymentAuthorizationViewController.canMakePayments) && ([PKPaymentAuthorizationViewController canMakePaymentsUsingNetworks:@[PKPaymentNetworkVisa, PKPaymentNetworkMasterCard, PKPaymentNetworkAmex, PKPaymentNetworkDiscover]])) {
-		applePayMerchantID = [command.arguments objectAtIndex:0];
-		currencyCode = [command.arguments objectAtIndex:1];
-		countryCode = [command.arguments objectAtIndex:2];
-	
-		applePayInited = YES;
-
-	    CDVPluginResult *res = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-	    [self.commandDelegate sendPluginResult:res callbackId:command.callbackId];
-    } else {
-	    CDVPluginResult *res = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"ApplePay cannot be used."];
-	    [self.commandDelegate sendPluginResult:res callbackId:command.callbackId];
-    }
+    
+    applePayMerchantID = [command.arguments objectAtIndex:0];
+    currencyCode = [command.arguments objectAtIndex:1];
+    countryCode = [command.arguments objectAtIndex:2];
+    
+    applePayInited = YES;
 }
 
 - (void)presentDropInPaymentUI:(CDVInvokedUrlCommand *)command {
@@ -189,22 +181,16 @@ NSString *countryCode;
                     
                     apPaymentRequest.merchantIdentifier = applePayMerchantID;
                     
-                    if ((PKPaymentAuthorizationViewController.canMakePayments) && ([PKPaymentAuthorizationViewController canMakePaymentsUsingNetworks:apPaymentRequest.supportedNetworks])) {
-                        PKPaymentAuthorizationViewController *viewController = [[PKPaymentAuthorizationViewController alloc] initWithPaymentRequest:apPaymentRequest];
-                        viewController.delegate = self;
+                    PKPaymentAuthorizationViewController *viewController = [[PKPaymentAuthorizationViewController alloc] initWithPaymentRequest:apPaymentRequest];
+                    viewController.delegate = self;
                     
-                        applePaySuccess = NO;
+                    applePaySuccess = NO;
                     
-                        /* display ApplePay ont the rootViewController */
-                        UIViewController *rootViewController = [[[UIApplication sharedApplication] keyWindow] rootViewController];
+                    /* display ApplePay ont the rootViewController */
+                    UIViewController *rootViewController = [[[UIApplication sharedApplication] keyWindow] rootViewController];
                     
-                        [rootViewController presentViewController:viewController animated:YES completion:nil];
-                    } else {
-                        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"ApplePay cannot be used."];
-                        
-                        [self.commandDelegate sendPluginResult:pluginResult callbackId:dropInUIcallbackId];
-                        dropInUIcallbackId = nil;
-                    }
+                    [rootViewController presentViewController:viewController animated:YES completion:nil];
+                    
                 } else {
                     NSDictionary *dictionary = [self getPaymentUINonceResult:result.paymentMethod];
                     
